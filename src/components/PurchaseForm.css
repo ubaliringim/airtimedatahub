@@ -1,0 +1,193 @@
+/* PurchaseForm.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+body, .telegram-wow-bg {
+  min-height: 100%;
+  width: 100%;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(120deg, #229ED9 0%, #e0e7ef 100%);
+  position: relative;
+  overflow-x: hidden;
+  animation: bgMove 12s ease-in-out infinite alternate;
+}
+
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.telegram-wow-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 2vw;
+  right: 2vw;
+  width: 120px;
+  height: 120px;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg') no-repeat center/contain;
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.telegram-wow-card {
+  background: rgba(255,255,255,0.75);
+  box-shadow: 0 8px 32px 0 rgba(34,158,217,0.18);
+  border-radius: 2rem;
+  padding: 1.5rem 1rem;
+  max-width: 340px;
+  width: 100%;
+  backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(34,158,217,0.18);
+  position: relative;
+  z-index: 1;
+  animation: cardFadeIn 0.8s cubic-bezier(.4,1.4,.6,1) 0.1s both;
+}
+
+@keyframes cardFadeIn {
+  0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.input-modern {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  border-radius: 2rem;
+  border: 1.5px solid #d1eaff;
+  background: rgba(248,251,255,0.95);
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(34,158,217,0.04);
+}
+
+.input-modern:focus {
+  border: 1.5px solid #229ED9;
+  box-shadow: 0 0 0 2px #229ED933;
+  background: #fff;
+}
+
+.input-modern:disabled {
+  background: #f1f5f9;
+  color: #b0b0b0;
+}
+
+select.input-modern {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' fill='none' stroke='%23229ED9' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25em;
+  padding-right: 2.5rem;
+}
+
+/* Network/Service Buttons */
+.network-wow-btn {
+  transition: box-shadow 0.2s, transform 0.15s, border 0.2s;
+  background: rgba(255,255,255,0.7);
+  border-radius: 1.5rem;
+  border: 1.5px solid #e0e7ef;
+  box-shadow: 0 2px 8px rgba(34,158,217,0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.network-wow-btn.selected {
+  box-shadow: 0 0 0 4px #229ED955, 0 2px 8px rgba(34,158,217,0.12);
+  border: 2px solid #229ED9;
+  background: linear-gradient(120deg, #fff 60%, #229ED9 100%);
+  color: #229ED9;
+  transform: scale(1.06);
+}
+
+.network-wow-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 2px #229ED933, 0 2px 8px rgba(34,158,217,0.10);
+}
+
+/* Service Buttons */
+.service-wow-btn {
+  transition: box-shadow 0.2s, transform 0.15s, border 0.2s;
+  background: rgba(255,255,255,0.7);
+  border-radius: 2rem;
+  border: 1.5px solid #e0e7ef;
+  box-shadow: 0 2px 8px rgba(34,158,217,0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.service-wow-btn.selected {
+  box-shadow: 0 0 0 4px #229ED955, 0 2px 8px rgba(34,158,217,0.12);
+  border: 2px solid #229ED9;
+  background: linear-gradient(120deg, #fff 60%, #229ED9 100%);
+  color: #229ED9;
+  transform: scale(1.06);
+}
+
+.service-wow-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 2px #229ED933, 0 2px 8px rgba(34,158,217,0.10);
+}
+
+/* Purchase Button */
+.wow-purchase-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  border-radius: 2rem;
+  font-weight: 800;
+  font-size: 1.15rem;
+  background: linear-gradient(90deg, #229ED9 0%, #5bc0eb 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 16px 0 rgba(34,158,217,0.13);
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.wow-purchase-btn:active {
+  transform: scale(0.98);
+  background: linear-gradient(90deg, #1b8ec6 0%, #229ED9 100%);
+}
+
+.wow-purchase-btn::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.3);
+  border-radius: 100%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+  z-index: 0;
+}
+
+.wow-purchase-btn:active::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.7s cubic-bezier(.4,1.4,.6,1) both;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-input-placeholder { color: #b0b0b0; }
+::-moz-placeholder { color: #b0b0b0; }
+:-ms-input-placeholder { color: #b0b0b0; }
+::placeholder { color: #b0b0b0; } 
