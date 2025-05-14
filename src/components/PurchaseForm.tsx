@@ -247,13 +247,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchas
     <div className="simple-bg flex flex-col items-center justify-center font-sans">
       <div className="w-full max-w-md mx-auto mt-8 mb-8">
         <div className="simple-card">
-          <div className="flex flex-col items-center mb-6">
-            <div className="bg-[#229ED9] rounded-full p-3 shadow mb-2">
-              <CreditCard size={32} className="text-white" />
-            </div>
-            <h2 className="text-2xl font-extrabold text-[#222] tracking-tight mb-1">Buy Airtime or Data</h2>
-            <p className="text-gray-500 text-sm text-center">Fast, secure, and reliable top-up for all networks</p>
-          </div>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             {service === 'airtime' && (
               <div>
@@ -343,9 +337,8 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchas
             <button
               type="submit"
               disabled={service === 'data' && (isLoading || !dataPackage || !planType)}
-              className="simple-btn"
-            >
-              <CreditCard size={22} />
+            className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all duration-150 bg-white hover:scale-105 focus:outline-none
+              ${service === 'data' && (isLoading || !dataPackage || !planType) ? ' cursor-not-allowed' : 'hover:shadow-lg'}`}>
               <span>Purchase {service === 'airtime' ? 'Airtime' : 'Data'}</span>
             </button>
           </form>

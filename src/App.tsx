@@ -32,8 +32,14 @@ const App: React.FC = () => {
     <div>
       {/* <Header /> */}
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Buy Airtime or Data</h2>
+        <div className="bg-[#6eb5d6] shadow-lg p-6 max-w-2xl mx-auto">
+        <div className="flex flex-col items-center mb-6">
+            <div className="bg-[#229ED9] rounded-full p-3 shadow mb-2">
+              <CreditCard size={32} className="text-white" />
+            </div>
+            <h2 className="text-2xl font-extrabold text-[#222] tracking-tight mb-1">Buy Airtime or Data</h2>
+            <p className="text-[#222] text-sm text-center">Fast, secure, and reliable top-up for all networks</p>
+          </div>
           
           <NetworkSelector
             selectedNetwork={selectedNetwork}

@@ -9,7 +9,7 @@ interface ServiceSelectorProps {
 const ServiceSelector: React.FC<ServiceSelectorProps> = ({ selectedService, onSelectService }) => {
   return (
     <div className="simple-card mb-6">
-      <h3 className="text-lg font-semibold mb-2 text-[#229ED9] text-center">Select Service</h3>
+      <h3 className="text-lg font-semibold mb-2 text-[#010101] text-center">Select Service</h3>
       <div className="flex gap-4 justify-center">
         <button
           className={`flex-1 flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-150 bg-white hover:scale-105 focus:outline-none
