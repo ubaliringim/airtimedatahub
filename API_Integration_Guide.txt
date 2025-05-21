@@ -1,0 +1,140 @@
+# API Integration Guide for Airtime & Data Purchase
+
+## 1. Network ID Mapping
+```js
+const networkIdMap: Record<string, number> = {
+  MTN: 1,
+  GLO: 3,
+  AIRTEL: 2,
+  '9MOBILE': 4,
+};
+```
+
+---
+
+## 2. Data Purchase API
+- **Endpoint:** `https://bilalsadasub.com/api/data`
+- **Payload:**
+```json
+{
+  "network": 1, // networkId
+  "phone": "08012345678",
+  "data_plan": 1, // data package id
+  "bypass": false,
+  "request-id": "Data_12345678900"
+}
+```
+- **Headers:**
+  - Authorization: Token eacdf6fcc939b11ff375c241749110a9868d048924c38f39ca8a4d70b55a
+  - Content-Type: application/json
+
+---
+
+## 3. Airtime Purchase API
+- **Endpoint:** `https://bilalsadasub.com/api/topup`
+- **Payload:**
+```json
+{
+  "network": 1, // networkId
+  "phone": "08012345678",
+  "plan_type": "VTU",
+  "bypass": false,
+  "amount": 100,
+  "request-id": "Airtime_12345678900"
+}
+```
+- **Headers:**
+  - Authorization: Token eacdf6fcc939b11ff375c241749110a9868d048924c38f39ca8a4d70b55a
+  - Content-Type: application/json
+
+---
+
+## 4. Example handleSubmit Function (React/TypeScript)
+```tsx
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const networkId = networkIdMap[network];
+  const requestId = `${service === 'data' ? 'Data' : 'Airtime'}_${Date.now()}`;
+
+  if (service === 'data') {
+    const payload = {
+      network: networkId,
+      phone: phoneNumber,
+      data_plan: Number(dataPackage),
+      bypass: false,
+      'request-id': requestId,
+    };
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch('https://bilalsadasub.com/api/data', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Token eacdf6fcc939b11ff375c241749110a9868d048924c38f39ca8a4d70b55a',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Purchase successful!');
+        onPurchaseComplete();
+      } else {
+        setError(result.message || 'Purchase failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  } else if (service === 'airtime') {
+    const payload = {
+      network: networkId,
+      phone: phoneNumber,
+      plan_type: 'VTU',
+      bypass: false,
+      amount: Number(amount),
+      'request-id': requestId,
+    };
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch('https://bilalsadasub.com/api/topup', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Token eacdf6fcc939b11ff375c241749110a9868d048924c38f39ca8a4d70b55a',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Airtime purchase successful!');
+        onPurchaseComplete();
+      } else {
+        setError(result.message || 'Airtime purchase failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+};
+```
+
+---
+
+**This guide covers:**
+- How to map form data to the API payload
+- The correct endpoints and headers
+- Example React code for handling both data and airtime purchases 

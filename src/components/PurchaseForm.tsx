@@ -146,6 +146,13 @@ const packagePlans = [
   { id: '148', network: 'AIRTEL', planType: 'GIFTING', size: '160GB', price: 30000, duration: '30days', name: '160GB GIFTING' },
 ];
 
+const networkIdMap: Record<string, number> = {
+  MTN: 1,
+  GLO: 3,
+  AIRTEL: 2,
+  '9MOBILE': 4,
+};
+
 const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchaseComplete }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [amount, setAmount] = useState('');
@@ -156,6 +163,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchas
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [planTypes, setPlanTypes] = useState<{ id: string, name: React.ReactNode }[]>([]);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     // Reset selections when network or service changes
@@ -201,10 +209,10 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchas
 
   const fetchDataPackages = async () => {
     if (!network || !planType) return;
-
+    
     setIsLoading(true);
     setError(null);
-
+    
     try {
       let filteredPackages;
       if (planType === 'ALL') {
@@ -226,101 +234,178 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchas
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Purchase submitted:', { 
-      network, 
-      service, 
-      phoneNumber, 
-      amount, 
-      dataPackage,
-      planType
-    });
-    
-    setTimeout(() => {
-      alert('Purchase successful!');
+    setSuccess(null);
+
+    const networkId = networkIdMap[network];
+    const requestId = `${service === 'data' ? 'Data' : 'Airtime'}_${Date.now()}`;
+
+    if (service === 'data') {
+      const payload = {
+        network: networkId,
+        phone: phoneNumber,
+        data_plan: Number(dataPackage),
+        bypass: false,
+        'request-id': requestId,
+      };
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch('https://bilalsadasub.com/api/data', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Token eacdf6fcc939b11ff375c241749110a9868d048924c38f39ca8a4d70b55a',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          setSuccess(getSuccessMessage());
+          onPurchaseComplete();
+        } else {
+          setError(result.message || 'Purchase failed. Please try again.');
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (service === 'airtime') {
+      const payload = {
+        network: networkId,
+        phone: phoneNumber,
+        plan_type: 'VTU',
+        bypass: false,
+        amount: Number(amount),
+        'request-id': requestId,
+      };
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch('https://bilalsadasub.com/api/topup', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Token eacdf6fcc939b11ff375c241749110a9868d048924c38f39ca8a4d70b55a',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          setSuccess(getSuccessMessage());
       onPurchaseComplete();
-    }, 1000);
+        } else {
+          if (result.message && result.message.toLowerCase().includes('insufficient')) {
+            setError('Insufficient Account Kindly Fund Your Wallet => ₦0.00');
+          } else {
+            setError(result.message || 'Airtime purchase failed. Please try again.');
+          }
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  // Helper to get purchase label
+  const getPurchaseLabel = () => {
+    if (service === 'airtime') return 'Airtime';
+    if (service === 'data') return 'Data';
+    return '';
+  };
+  // Helper to get success message
+  const getSuccessMessage = () => {
+    if (service === 'airtime') return 'Airtime purchase successful!';
+    if (service === 'data') return 'Data purchase successful!';
+    return 'Purchase successful!';
   };
 
   return (
     <div className="simple-bg flex flex-col items-center justify-center font-sans">
       <div className="w-full max-w-md mx-auto mt-8 mb-8">
         <div className="simple-card">
-          
           <form onSubmit={handleSubmit} className="space-y-6">
-            {service === 'airtime' && (
-              <div>
-                <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 mb-1">
-                  Amount (₦)
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+            {/* Airtime Section */}
+      {service === 'airtime' && (
+        <div>
+                <h4 className="text-md font-bold text-blue-700 mb-2">Airtime Details</h4>
+                <label htmlFor="amount" className="block text-sm font-bold text-blue-700 mb-1">
+            Amount (₦)
+          </label>
+          <input
+            type="number"
+            id="amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
                   className="input-modern"
                   placeholder="Enter amount"
-                  required
-                />
-              </div>
-            )}
+            required
+          />
+        </div>
+      )}
 
-            {service === 'data' && (
-              <>
-                <div>
-                  <label htmlFor="planType" className="block text-sm font-semibold text-gray-700 mb-1">
-                    Plan Type
-                  </label>
-                  <select
-                    id="planType"
-                    value={planType}
-                    onChange={(e) => setPlanType(e.target.value)}
+            {/* Data Section */}
+      {service === 'data' && (
+        <>
+          <div>
+                  <h4 className="text-md font-bold text-blue-700 mb-2">Data Details</h4>
+                  <label htmlFor="planType" className="block text-sm font-bold text-blue-700 mb-1">
+              Plan Type
+            </label>
+            <select
+              id="planType"
+              value={planType}
+              onChange={(e) => setPlanType(e.target.value)}
                     className="input-modern"
-                    required
-                  >
-                    <option value="">Select a plan type</option>
-                    {planTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="dataPackage" className="block text-sm font-semibold text-gray-700 mb-1">
-                    Data Plan
-                  </label>
-                  {isLoading ? (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader className="animate-spin text-blue-500 mr-2" size={20} />
-                      <span className="text-sm text-gray-500">Loading packages...</span>
-                    </div>
-                  ) : error ? (
-                    <div className="text-red-500 text-sm p-2 rounded bg-red-50 border border-red-200">{error}</div>
-                  ) : (
-                    <select
-                      id="dataPackage"
-                      value={dataPackage}
-                      onChange={(e) => setDataPackage(e.target.value)}
-                      className="input-modern"
-                      required
-                    >
-                      <option value="">Select a package</option>
-                      {dataPackages.map((pkg) => (
-                        <option key={pkg.id} value={pkg.id}>
-                          {pkg.size} {pkg.name} = ₦{pkg.price.toFixed(2)} {pkg.duration}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              </>
-            )}
+              required
+            >
+              <option value="">Select a plan type</option>
+              {planTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label htmlFor="dataPackage" className="block text-sm font-bold text-blue-700 mb-1">
+                    Data Plan
+            </label>
+              <select
+                id="dataPackage"
+                value={dataPackage}
+                onChange={(e) => setDataPackage(e.target.value)}
+                    className="input-modern"
+                required
+              >
+                <option value="">Select a package</option>
+                {dataPackages.map((pkg) => (
+                  <option key={pkg.id} value={pkg.id}>
+                        {pkg.size} {pkg.name} = ₦{pkg.price.toFixed(2)} {pkg.duration}
+                  </option>
+                ))}
+              </select>
+          </div>
+        </>
+      )}
+
+            {/* Recipient Section */}
+            <div>
+              <h4 className="text-md font-bold text-blue-700 mb-2">Recipient</h4>
+              <label htmlFor="phoneNumber" className="block text-sm font-bold text-blue-700 mb-1">
                 Phone Number
               </label>
               <input
@@ -334,14 +419,44 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ network, service, onPurchas
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={service === 'data' && (isLoading || !dataPackage || !planType)}
-            className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all duration-150 bg-white hover:scale-105 focus:outline-none
-              ${service === 'data' && (isLoading || !dataPackage || !planType) ? ' cursor-not-allowed' : 'hover:shadow-lg'}`}>
-              <span>Purchase {service === 'airtime' ? 'Airtime' : 'Data'}</span>
-            </button>
-          </form>
+            {/* Success message above the button */}
+            {success && (
+              <div className="text-green-700 text-center mb-2 p-2 rounded bg-green-50 border border-green-200">
+                {success}
+              </div>
+            )}
+            {/* Error message above the button */}
+            {error && (
+              <div className="text-red-600 text-center mb-2 p-2 rounded bg-red-50 border border-red-200">
+                {error}
+              </div>
+            )}
+      <button
+        type="submit"
+              disabled={
+                isLoading ||
+                (service === 'data' && (!dataPackage || !planType || !phoneNumber)) ||
+                (service === 'airtime' && (!amount || !phoneNumber))
+              }
+              className={`wow-purchase-btn w-full flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-150 font-bold text-lg shadow-lg
+                bg-white
+                ${isLoading || (service === 'data' && (!dataPackage || !planType || !phoneNumber)) || (service === 'airtime' && (!amount || !phoneNumber))
+                  ? 'text-gray-400 border-gray-200 opacity-60 cursor-not-allowed'
+                  : 'text-[#229ED9] border-[#229ED9] hover:bg-blue-50 hover:scale-105'}`}
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin h-6 w-6 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                <span>Purchase {getPurchaseLabel()}</span>
+              )}
+      </button>
+    </form>
         </div>
       </div>
     </div>
