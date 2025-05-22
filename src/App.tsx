@@ -30,12 +30,15 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (telegramUser) {
+      console.log("Telegram User:", telegramUser);
       // Send user info to backend for registration/authentication
       fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ telegramUser }),
-      });
+      }).then(response => response.json())
+        .then(data => console.log("Response from server:", data))
+        .catch(error => console.error("Error sending user data:", error));
     }
   }, [telegramUser]);
 

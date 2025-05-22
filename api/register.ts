@@ -18,6 +18,8 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  console.log("Request body:", req.body); // Log the request body
+
   const { telegramUser }: { telegramUser: TelegramUser } = req.body;
 
   // Upsert user into 'users' table
@@ -32,12 +34,14 @@ export default async function handler(req: any, res: any) {
         email: telegramUser.email,
         wallet_balance: telegramUser.wallet_balance || 0, // Default to 0 if not provided
       }
-    ], { onConflict: 'telegram_id' }); // Use a single string for onConflict
+    ], { onConflict: 'telegram_id' });
 
   if (error) {
+    console.error("Supabase error:", error); // Log Supabase error
     return res.status(500).json({ error: error.message });
   }
 
+  console.log("User registered/updated:", data); // Log success
   return res.status(200).json({
     message: 'User registered/updated',
     user: data,
