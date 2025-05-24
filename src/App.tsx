@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [showFundModal, setShowFundModal] = useState(false);
   const [fundAmount, setFundAmount] = useState('');
   const telegramUser = useTelegramUser();
+  const [isPhoneNumberRequested, setIsPhoneNumberRequested] = useState(false);
 
   useEffect(() => {
     // Initialize Telegram Mini App
@@ -41,6 +42,39 @@ const App: React.FC = () => {
         .catch(error => console.error("Error sending user data:", error));
     }
   }, [telegramUser]);
+
+  useEffect(() => {
+    if (telegramUser && !isPhoneNumberRequested) {
+      // Check if the phone number is already stored
+      fetch(`/api/check-phone-number?telegramId=${telegramUser.id}`)
+        .then(response => response.json())
+        .then(data => {
+          if (!data.phoneNumber) {
+            // Request phone number if not stored
+            window.Telegram.WebApp.showPopup({
+              title: 'Phone Number Required',
+              message: 'Please enter your phone number:',
+              buttons: [
+                { text: 'Submit', type: 'input', placeholder: 'Enter phone number' }
+              ],
+              onSubmit: (inputValue: string) => {
+                // Send phone number to backend for storage
+                fetch('/api/register', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ telegramUser, phoneNumber: inputValue }),
+                })
+                .then(response => response.json())
+                .then(data => console.log('Phone number stored:', data))
+                .catch(error => console.error('Error storing phone number:', error));
+              }
+            });
+            setIsPhoneNumberRequested(true);
+          }
+        })
+        .catch(error => console.error('Error checking phone number:', error));
+    }
+  }, [telegramUser, isPhoneNumberRequested]);
 
   const handlePurchaseComplete = () => {
     // Close the Mini App after purchase

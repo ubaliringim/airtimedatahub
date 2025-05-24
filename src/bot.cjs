@@ -17,8 +17,6 @@ async function savePhoneNumber(telegramId, phoneNumber) {
 
     if (error) {
       console.error('Error updating phone number:', error);
-    } else {
-      console.log(`Phone number ${phoneNumber} saved for user ${telegramId}`);
     }
   } catch (err) {
     console.error('Unexpected error:', err);
