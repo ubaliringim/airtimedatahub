@@ -26,10 +26,8 @@ export default async function handler(req, res) {
           username: telegramUser.username,
           first_name: telegramUser.first_name,
           last_name: telegramUser.last_name,
-          language_code: telegramUser.language_code,
-          photo_url: telegramUser.photo_url,
-          allows_write_to_pm: telegramUser.allows_write_to_pm,
-          wallet_balance: 0
+          wallet_balance: 0,
+          email: telegramUser.email
         }
       ], { onConflict: 'telegram_id' });
 
