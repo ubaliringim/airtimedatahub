@@ -27,7 +27,8 @@ export default async function handler(req, res) {
           first_name: telegramUser.first_name,
           last_name: telegramUser.last_name,
           wallet_balance: 0,
-          email: telegramUser.email
+          email: telegramUser.email,
+          phone_number: telegramUser.phone_number
         }
       ], { onConflict: 'telegram_id' });
 
