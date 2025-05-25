@@ -76,9 +76,9 @@ bot.on('message', async (msg) => {
     await updatePhoneNumber(userId, phoneNumber);
 
     waitingForPhone.delete(userId); // Done collecting
-    bot.sendMessage(chatId, '✅ Phone number saved! You can now access the app: https://your-web-app-url.com', {
+    bot.sendMessage(chatId, '✅ Phone number saved! You can now access the app: https://airtimedatahub.vercel.app', {
       reply_markup: {
-        inline_keyboard: [[{ text: 'Open App', url: 'https://your-web-app-url.com' }]]
+        inline_keyboard: [[{ text: 'Open App', url: 'https://airtimedatahub.vercel.app' }]]
       }
     });
   }
