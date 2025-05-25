@@ -1,12 +1,12 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { createClient } = require('@supabase/supabase-js');
 
-const token = '7356287998:AAHwaXfKXFHjezwBsuaaOXKC_01uXgWzNW8'; // Replace this
+const token = '7356287998:AAHwaXfKXFHjezwBsuaaOXKC_01uXgWzNW8';
 const bot = new TelegramBot(token, { polling: true });
 
 const supabase = createClient(
   'https://vnkdufqsmzqyqvrvwzuv.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZua2R1ZnFzbXpxeXF2cnZ3enV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4Mzc2NjQsImV4cCI6MjA2MzQxMzY2NH0.ZihwFcN3OmnkH0ENdmIPuOB9QsC8XDuGKwSX6vldx0E' // Replace this
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZua2R1ZnFzbXpxeXF2cnZ3enV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4Mzc2NjQsImV4cCI6MjA2MzQxMzY2NH0.ZihwFcN3OmnkH0ENdmIPuOB9QsC8XDuGKwSX6vldx0E'
 );
 
 // Store users waiting for phone number
@@ -76,9 +76,13 @@ bot.on('message', async (msg) => {
     await updatePhoneNumber(userId, phoneNumber);
 
     waitingForPhone.delete(userId); // Done collecting
-    bot.sendMessage(chatId, '✅ Phone number saved! You can now access the app: https://airtimedatahub.vercel.app', {
+
+    // Send CONTINUE button only
+    bot.sendMessage(chatId, '✅ Phone number saved!', {
       reply_markup: {
-        inline_keyboard: [[{ text: 'Open App', url: 'https://airtimedatahub.vercel.app' }]]
+        inline_keyboard: [
+          [{ text: 'CONTINUE', url: 'https://airtimedatahub.vercel.app' }]
+        ]
       }
     });
   }
