@@ -87,6 +87,18 @@ async function saveOrUpdateUser(telegramId, username, firstName, lastName, phone
   }
 }
 
+// Function to handle new user data
+async function handleNewUserData(msg) {
+  const telegramId = msg.from.id;
+  const username = msg.from.username;
+  const firstName = msg.from.first_name;
+  const lastName = msg.from.last_name || '';
+  const phoneNumber = msg.contact.phone_number;
+
+  // Save new user data to the database
+  await saveNewUser(telegramId, username, firstName, lastName, phoneNumber);
+}
+
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   const telegramId = msg.from.id;
@@ -118,14 +130,9 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.on('contact', async (msg) => {
   const chatId = msg.chat.id;
-  const phoneNumber = msg.contact.phone_number;
-  const telegramId = msg.from.id;
-  const username = msg.from.username;
-  const firstName = msg.from.first_name;
-  const lastName = msg.from.last_name || '';
 
-  // Save or update the user information in the database
-  await saveOrUpdateUser(telegramId, username, firstName, lastName, phoneNumber);
+  // Handle new user data
+  await handleNewUserData(msg);
 
   // Send a message with a link to the web app
   bot.sendMessage(chatId, 'Thank you! You can now access the web app: https://your-web-app-url.com', {
