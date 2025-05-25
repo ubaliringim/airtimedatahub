@@ -95,6 +95,8 @@ async function handleNewUserData(msg) {
   const lastName = msg.from.last_name || '';
   const phoneNumber = msg.contact ? msg.contact.phone_number : null;
 
+  console.log('Extracted phone number:', phoneNumber); // Log the phone number
+
   if (phoneNumber) {
     // Save new user data to the database
     await saveNewUser(telegramId, username, firstName, lastName, phoneNumber);
