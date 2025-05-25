@@ -78,7 +78,7 @@ bot.on('message', async (msg) => {
     waitingForPhone.delete(userId); // Done collecting
 
     // Send CONTINUE button only
-    bot.sendMessage(chatId, '', {
+    bot.sendMessage(chatId, 'Click Below To Proceed', {
       reply_markup: {
        inline_keyboard: [
   [{ text: 'CONTINUE', web_app: { url: 'https://airtimedatahub.vercel.app' } }]
