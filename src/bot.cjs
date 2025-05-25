@@ -80,9 +80,10 @@ bot.on('message', async (msg) => {
     // Send CONTINUE button only
     bot.sendMessage(chatId, '✅ Phone number saved!', {
       reply_markup: {
-        inline_keyboard: [
-          [{ text: 'CONTINUE', url: 'https://airtimedatahub.vercel.app' }]
-        ]
+       inline_keyboard: [
+  [{ text: 'CONTINUE', web_app: { url: 'https://airtimedatahub.vercel.app' } }]
+]
+
       }
     });
   }
