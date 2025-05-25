@@ -66,6 +66,27 @@ async function saveNewUser(telegramId, username, firstName, lastName) {
   }
 }
 
+// Function to save or update user information in Supabase
+async function saveOrUpdateUser(telegramId, username, firstName, lastName, phoneNumber) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .upsert({
+        telegram_id: telegramId,
+        username: username,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber
+      }, { onConflict: 'telegram_id' });
+
+    if (error) {
+      console.error('Error saving or updating user:', error);
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err);
+  }
+}
+
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   const telegramId = msg.from.id;
@@ -99,9 +120,12 @@ bot.on('contact', async (msg) => {
   const chatId = msg.chat.id;
   const phoneNumber = msg.contact.phone_number;
   const telegramId = msg.from.id;
+  const username = msg.from.username;
+  const firstName = msg.from.first_name;
+  const lastName = msg.from.last_name || '';
 
-  // Save the phone number to your database
-  await savePhoneNumber(telegramId, phoneNumber);
+  // Save or update the user information in the database
+  await saveOrUpdateUser(telegramId, username, firstName, lastName, phoneNumber);
 
   // Send a message with a link to the web app
   bot.sendMessage(chatId, 'Thank you! You can now access the web app: https://your-web-app-url.com', {
