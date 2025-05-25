@@ -1,154 +1,85 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { createClient } = require('@supabase/supabase-js');
-const token = '7356287998:AAHwaXfKXFHjezwBsuaaOXKC_01uXgWzNW8'; // Replace with your bot token
+
+const token = 'YOUR_BOT_TOKEN'; // Replace this
 const bot = new TelegramBot(token, { polling: true });
 
-const supabaseUrl = 'https://vnkdufqsmzqyqvrvwzuv.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZua2R1ZnFzbXpxeXF2cnZ3enV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4Mzc2NjQsImV4cCI6MjA2MzQxMzY2NH0.ZihwFcN3OmnkH0ENdmIPuOB9QsC8XDuGKwSX6vldx0E';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  'https://vnkdufqsmzqyqvrvwzuv.supabase.co',
+  'YOUR_SUPABASE_KEY' // Replace this
+);
 
-// Function to save phone number to Supabase
-async function savePhoneNumber(telegramId, phoneNumber) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({ phone_number: phoneNumber })
-      .eq('telegram_id', telegramId);
+// Store users waiting for phone number
+const waitingForPhone = new Map();
 
-    if (error) {
-      console.error('Error updating phone number:', error);
-    }
-  } catch (err) {
-    console.error('Unexpected error:', err);
-  }
+// Save or update user in Supabase
+async function saveOrUpdateUser(user) {
+  const { id, username, first_name, last_name, phone_number = null } = user;
+
+  const { error } = await supabase.from('users').upsert(
+    {
+      telegram_id: id,
+      username,
+      first_name,
+      last_name,
+      phone_number,
+      wallet_balance: 0,
+      email: null
+    },
+    { onConflict: 'telegram_id' }
+  );
+
+  if (error) console.error('Supabase Error:', error);
 }
 
-// Function to check if user exists in Supabase
-async function checkUserExists(telegramId) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('telegram_id')
-      .eq('telegram_id', telegramId);
+// Update phone number only
+async function updatePhoneNumber(telegramId, phoneNumber) {
+  const { error } = await supabase
+    .from('users')
+    .update({ phone_number: phoneNumber })
+    .eq('telegram_id', telegramId);
 
-    if (error) {
-      console.error('Error checking user existence:', error);
-      return false;
-    }
-
-    return data.length > 0;
-  } catch (err) {
-    console.error('Unexpected error:', err);
-    return false;
-  }
-}
-
-// Function to save new user to Supabase
-async function saveNewUser(telegramId, username, firstName, lastName, phoneNumber) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .insert({
-        telegram_id: telegramId,
-        username: username,
-        first_name: firstName,
-        last_name: lastName,
-        wallet_balance: 0, // Initialize wallet balance to 0
-        email: null, // Email can be updated later if available
-        phone_number: phoneNumber // Phone number will be updated when received
-      });
-
-    if (error) {
-      console.error('Error saving new user:', error);
-    }
-  } catch (err) {
-    console.error('Unexpected error:', err);
-  }
-}
-
-// Function to save or update user information in Supabase
-async function saveOrUpdateUser(telegramId, username, firstName, lastName, phoneNumber) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .upsert({
-        telegram_id: telegramId,
-        username: username,
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: phoneNumber
-      }, { onConflict: 'telegram_id' });
-
-    if (error) {
-      console.error('Error saving or updating user:', error);
-    }
-  } catch (err) {
-    console.error('Unexpected error:', err);
-  }
-}
-
-// Function to handle new user data
-async function handleNewUserData(msg) {
-  const telegramId = msg.from.id;
-  const username = msg.from.username;
-  const firstName = msg.from.first_name;
-  const lastName = msg.from.last_name || '';
-  const phoneNumber = msg.contact ? msg.contact.phone_number : null;
-
-  if (phoneNumber) {
-    // Save new user data to the database
-    await saveNewUser(telegramId, username, firstName, lastName, phoneNumber);
-  } else {
-    console.error('Phone number not provided.');
-  }
+  if (error) console.error('Error updating phone number:', error);
 }
 
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
-  const telegramId = msg.from.id;
-  const username = msg.from.username;
-  const firstName = msg.from.first_name;
-  const lastName = msg.from.last_name || ''; // Handle case where last name might be undefined
+  const user = msg.from;
 
-  // Check if user exists
-  const userExists = await checkUserExists(telegramId);
+  // Save user without phone number
+  await saveOrUpdateUser(user);
 
-  if (!userExists) {
-    // Save new user
-    await saveNewUser(telegramId, username, firstName, lastName);
-
-    // Greet the user and ask for phone number
-    bot.sendMessage(chatId, `Hi ${firstName}! Please insert your phone number:`, {
-      reply_markup: {
-        keyboard: [
-          [{ text: 'Share Contact', request_contact: true }]
-        ],
-        one_time_keyboard: true
-      }
-    });
-  } else {
-    // Greet returning user
-    bot.sendMessage(chatId, `Welcome back, ${firstName}!`);
-  }
+  // Ask for phone number
+  bot.sendMessage(chatId, 'Welcome! Please enter your phone number:');
+  waitingForPhone.set(user.id, true); // Flag this user
 });
 
-bot.on('contact', async (msg) => {
+// Handle all messages (to capture phone number text)
+bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
+  const userId = msg.from.id;
 
-  // Handle new user data
-  await handleNewUserData(msg);
+  // Ignore commands and system messages
+  if (msg.text?.startsWith('/')) return;
 
-  // Send a message with a link to the web app
-  bot.sendMessage(chatId, 'Thank you! You can now access the web app: https://your-web-app-url.com', {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: 'Open App',
-            url: 'https://your-web-app-url.com' // Replace with your actual app URL
-          }
-        ]
-      ]
+  // If waiting for phone number
+  if (waitingForPhone.get(userId)) {
+    const phoneNumber = msg.text;
+
+    // Optional: validate format
+    const isValid = /^\+?\d{7,15}$/.test(phoneNumber);
+    if (!isValid) {
+      return bot.sendMessage(chatId, 'Invalid phone number. Please try again (e.g., +2348012345678)');
     }
-  });
-}); 
+
+    // Save to Supabase
+    await updatePhoneNumber(userId, phoneNumber);
+
+    waitingForPhone.delete(userId); // Done collecting
+    bot.sendMessage(chatId, '✅ Phone number saved! You can now access the app: https://your-web-app-url.com', {
+      reply_markup: {
+        inline_keyboard: [[{ text: 'Open App', url: 'https://your-web-app-url.com' }]]
+      }
+    });
+  }
+});
