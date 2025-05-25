@@ -44,7 +44,7 @@ async function checkUserExists(telegramId) {
 }
 
 // Function to save new user to Supabase
-async function saveNewUser(telegramId, username, firstName, lastName) {
+async function saveNewUser(telegramId, username, firstName, lastName, phoneNumber) {
   try {
     const { data, error } = await supabase
       .from('users')
@@ -55,7 +55,7 @@ async function saveNewUser(telegramId, username, firstName, lastName) {
         last_name: lastName,
         wallet_balance: 0, // Initialize wallet balance to 0
         email: null, // Email can be updated later if available
-        phone_number: null // Phone number will be updated when received
+        phone_number: phoneNumber // Phone number will be updated when received
       });
 
     if (error) {
