@@ -76,16 +76,10 @@ bot.on('message', async (msg) => {
     await updatePhoneNumber(userId, phoneNumber);
 
     waitingForPhone.delete(userId); // Done collecting
-    bot.sendMessage(chatId, "✅ Phone number saved!", {
-  reply_markup: {
-    inline_keyboard: [[
-      {
-        text: "CONTINUE",
-        web_app: { url: "https://airtimedatahub.vercel.app" }
+    bot.sendMessage(chatId, '✅ Phone number saved! You can now access the app: https://airtimedatahub.vercel.app', {
+      reply_markup: {
+        inline_keyboard: [[{ text: 'Open App', url: 'https://airtimedatahub.vercel.app' }]]
       }
-    ]]
-  }
-});
-
+    });
   }
 });
