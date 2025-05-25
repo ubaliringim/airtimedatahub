@@ -6,7 +6,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 const supabase = createClient(
   'https://vnkdufqsmzqyqvrvwzuv.supabase.co',
-  'YOUR_SUPABASE_KEY' // Replace this
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZua2R1ZnFzbXpxeXF2cnZ3enV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4Mzc2NjQsImV4cCI6MjA2MzQxMzY2NH0.ZihwFcN3OmnkH0ENdmIPuOB9QsC8XDuGKwSX6vldx0E' // Replace this
 );
 
 // Store users waiting for phone number
