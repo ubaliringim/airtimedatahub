@@ -93,10 +93,14 @@ async function handleNewUserData(msg) {
   const username = msg.from.username;
   const firstName = msg.from.first_name;
   const lastName = msg.from.last_name || '';
-  const phoneNumber = msg.contact.phone_number;
+  const phoneNumber = msg.contact ? msg.contact.phone_number : null;
 
-  // Save new user data to the database
-  await saveNewUser(telegramId, username, firstName, lastName, phoneNumber);
+  if (phoneNumber) {
+    // Save new user data to the database
+    await saveNewUser(telegramId, username, firstName, lastName, phoneNumber);
+  } else {
+    console.error('Phone number not provided.');
+  }
 }
 
 bot.onText(/\/start/, async (msg) => {
